@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
@@ -33,7 +34,13 @@ Route::middleware([
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
-    Route::resource('post', PostController::class)->parameters([
+
+    Route::resource('posts', PostController::class)->parameters([
 		'post' => 'post'
 	]);
+
+    Route::resource('categories', CategoryController::class)->parameters([
+		'category' => 'category'
+	]);
+
 });

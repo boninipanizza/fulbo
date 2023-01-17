@@ -14,6 +14,10 @@ const props = defineProps({
         type: Array,
         default: () => ['py-1', 'bg-white'],
     },
+    eventOnHover: {
+        type: Boolean,
+        default: false,
+    }
 });
 
 let open = ref(false);
@@ -23,6 +27,12 @@ const closeOnEscape = (e) => {
         open.value = false;
     }
 };
+
+const closeOnLeave = () => {
+    if (eventOnHover) { 
+        open.value = false
+    }
+}
 
 onMounted(() => document.addEventListener('keydown', closeOnEscape));
 onUnmounted(() => document.removeEventListener('keydown', closeOnEscape));
@@ -47,8 +57,8 @@ const alignmentClasses = computed(() => {
 </script>
 
 <template>
-    <div class="relative">
-        <div @click="open = ! open">
+    <div class="relative"  @mouseenter="open = true && eventOnHover">
+        <div @click="open = ! open" >
             <slot name="trigger" />
         </div>
 
@@ -65,6 +75,7 @@ const alignmentClasses = computed(() => {
         >
             <div
                 v-show="open"
+                @mouseleave="open=false"
                 class="absolute z-50 mt-2 rounded-md shadow-lg"
                 :class="[widthClass, alignmentClasses]"
                 style="display: none;"

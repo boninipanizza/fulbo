@@ -19,7 +19,7 @@ return new class extends Migration
 			$table->timestamps();
 			$table->text('content');
 			$table->tinyText('title');
-			$table->string('slug', 100)->unique();
+			$table->string('slug', 100);
 			$table->foreignId('image_id')->onDelete('cascade');
 		});
 	}

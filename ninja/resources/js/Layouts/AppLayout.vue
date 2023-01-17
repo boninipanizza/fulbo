@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { Inertia } from '@inertiajs/inertia';
 import { Head, Link } from '@inertiajs/inertia-vue3';
 import ApplicationMark from '@/Components/ApplicationMark.vue';
@@ -8,12 +8,16 @@ import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
+import Toast from '@/Components/Toast.vue';
+import { usePage } from '@inertiajs/inertia-vue3'
 
 defineProps({
     title: String,
 });
 
 const showingNavigationDropdown = ref(false);
+const displayMessage = ref(false)
+
 
 const switchToTeam = (team) => {
     Inertia.put(route('current-team.update'), {
@@ -23,14 +27,22 @@ const switchToTeam = (team) => {
     });
 };
 
+
+const closeToast = () => {
+    usePage().props.value.flash = {}
+}
+
 const logout = () => {
     Inertia.post(route('logout'));
 };
+
+const showToast = () => displayMessage.value = Boolean(usePage().props.flash.message)
+
 </script>
 
 <template>
     <div>
-        <Head :title="title" />
+        <Head :title="title"  />
 
         <Banner />
 
@@ -52,7 +64,93 @@ const logout = () => {
                                 <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
                                     Dashboard
                                 </NavLink>
+
+                                <NavLink @mouseover="openDropDown=true" :href="route('categories.index')" :active="route().current('categories.index')">
+                                    <Dropdown eventOnHover="true" align="left" width="48">
+                                        <template #trigger>
+                                                <button type="button" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition">
+                                                    Categories
+                                                    <svg
+                                                        class="ml-2 -mr-0.5 h-4 w-4"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        viewBox="0 0 20 20"
+                                                        fill="currentColor"
+                                                    >
+                                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                                    </svg>
+                                                </button>
+   
+                                        </template>
+
+                                        <template #content>
+
+                                            <DropdownLink :href="route('categories.index')">
+                                                All categories
+                                            </DropdownLink>
+
+                                            <DropdownLink :href="route('categories.create')">
+                                                New category
+                                            </DropdownLink>
+
+                                            <div class="border-t border-gray-100" />
+
+                                        </template>
+                                    </Dropdown>
+                                </NavLink>
+
+                                <NavLink @mouseover="openDropDown=true" :href="route('posts.index')" :active="route().current('posts.index')">
+                                    <Dropdown eventOnHover="true" align="left" width="48">
+                                        <template #trigger>
+                                                <button type="button" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition">
+                                                    Posts
+                                                    <svg
+                                                        class="ml-2 -mr-0.5 h-4 w-4"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        viewBox="0 0 20 20"
+                                                        fill="currentColor"
+                                                    >
+                                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                                    </svg>
+                                                </button>
+   
+                                        </template>
+
+                                        <template #content>
+
+                                            <DropdownLink :href="route('posts.index')">
+                                                All posts
+                                            </DropdownLink>
+
+                                            <DropdownLink :href="route('posts.create')">
+                                                New post
+                                            </DropdownLink>
+
+                                            <div class="border-t border-gray-100" />
+
+                                        </template>
+                                    </Dropdown>
+                                </NavLink>
+
                             </div>
+
+                            <Dropdown align="right" width="60">
+                                    <template #trigger>
+
+                                    </template>
+                                    <template #content>
+                                        <div class="w-60">
+                                            <!-- Team Management -->
+                                            <template>
+                                                <div class="block px-4 py-2 text-xs text-gray-400">
+                                                    Manage Team
+                                                </div>
+                                                <DropdownLink :href="route('post.create')">
+                                                    Team Settings
+                                                </DropdownLink>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </Dropdown>
                         </div>
 
                         <div class="hidden sm:flex sm:items-center sm:ml-6">
@@ -154,10 +252,6 @@ const logout = () => {
                                         <div class="block px-4 py-2 text-xs text-gray-400">
                                             Manage Account
                                         </div>
-
-                                        <DropdownLink :href="route('post.index')">
-                                            Posts
-                                        </DropdownLink>
 
                                         <DropdownLink :href="route('profile.show')">
                                             Profile
@@ -308,6 +402,14 @@ const logout = () => {
 
             <!-- Page Content -->
             <main>
+                <Transition name="slide-fade">
+                    <Toast 
+                        v-if="showToast"
+                        :type="$page.props.flash.messageType"
+                        :message="$page.props.flash.message"
+                        @closeToast="closeToast"
+                    />
+                </Transition>
                 <slot />
             </main>
         </div>
